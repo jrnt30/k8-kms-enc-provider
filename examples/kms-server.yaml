@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ""
+  creationTimestamp: null
+  labels:
+    component: kms-server
+    tier: control-plane
+  name: kms-server
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kms-server
+    image: kms-server
+    imagePullPolicy: IfNotPresent
+    # env:
+    # - name: AWS_ACCESS_KEY_ID
+    #   value: < ACCESS KEY >
+    # - name: AWS_SECRET_ACCESS_KEY
+    #   value: < SECRET KEY >
+    command:
+    - /usr/local/bin/k8-kms-enc-provider
+    - server
+    - --key-id=< KMS KEY ARN >
+    - --region=us-east-1
+    - --socket=/etc/kubernetes/kms/socketfile.sock
+    volumeMounts:
+    - name: kms-enc
+      mountPath: /etc/kubernetes/kms
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/kms
+      type: DirectoryOrCreate
+    name: kms-enc

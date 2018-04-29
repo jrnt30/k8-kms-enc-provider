@@ -32,8 +32,8 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
-	"github.com/jrnt30/aws-kms-k8-enc-provider/pkg"
-	"github.com/jrnt30/aws-kms-k8-enc-provider/v1beta1"
+	"github.com/jrnt30/k8-kms-enc-provider/pkg"
+	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 )
 
 var awsRegion string
@@ -54,13 +54,21 @@ to quickly create a Cobra application.`,
 			AwsRegion: aws.String(awsRegion),
 			KeyId:     aws.String(keyID),
 		})
+		if err != nil {
+			log.Fatal("Error creating the backing KMS provider: ", err)
+		}
 
 		server := grpc.NewServer()
-		lis, err := net.Listen("unix", socketPath)
-		defer lis.Close()
+		addr, err := net.ResolveUnixAddr("unix", socketPath)
+		if err != nil {
+			log.Fatal("Error resolving the socket, existing", err)
+		}
+
+		lis, err := net.ListenUnix("unix", addr)
 		if err != nil {
 			log.Fatal("Error creating the socket listener, existing", err)
 		}
+		defer lis.Close()
 
 		sigTerm := make(chan os.Signal, 1)
 		signal.Notify(sigTerm, os.Interrupt, os.Kill, syscall.SIGTERM)
@@ -69,6 +77,7 @@ to quickly create a Cobra application.`,
 		waits.Add(1)
 
 		go func() {
+			log.Print("Registering listener on the GRPC server")
 			v1beta1.RegisterKeyManagementServiceServer(server, keyProviderServer)
 			server.Serve(lis)
 			waits.Done()

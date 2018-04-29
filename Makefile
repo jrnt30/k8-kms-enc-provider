@@ -5,3 +5,7 @@ default: ; @true
 .PHONY: protos
 protos:
 	protoc --go_out plugins=grpc:generated/ --proto_path proto/ proto/*.proto
+
+docker-build: 
+	docker build -t kms-server . 
+

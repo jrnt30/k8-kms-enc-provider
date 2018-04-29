@@ -33,7 +33,7 @@ var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "aws-kms-k8-enc-provider",
+	Use:   "k8-kms-enc-provider",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -61,7 +61,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "configuration file to use (default is ~/.aws-kms-k8-enc-provider)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "configuration file to use (default is ~/.k8-kms-enc-provider)")
 	RootCmd.PersistentFlags().StringVar(&socketPath, "socket", "/tmp/kms-grpc", "path to the socket to use")
 }
 
@@ -71,7 +71,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	viper.SetConfigName(".aws-kms-k8-enc-provider") // name of config file (without extension)
+	viper.SetConfigName(".k8-kms-enc-provider") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")                    // adding home directory as first search path
 	viper.AutomaticEnv()                            // read in environment variables that match
 

@@ -28,7 +28,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/jrnt30/aws-kms-k8-enc-provider/v1beta1"
+	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -67,7 +67,7 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Got response: ", resp)
+		fmt.Printf("%s", string(resp.Plain))
 	},
 }
 

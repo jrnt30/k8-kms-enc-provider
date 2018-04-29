@@ -29,7 +29,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 
-	"github.com/jrnt30/aws-kms-k8-enc-provider/v1beta1"
+	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 )
 
 // Ensure that our implemetnation stays in contract with the Protobuf's specification
@@ -70,6 +70,7 @@ func NewAwsKmsProvider(cfg *AwsKmsProviderConfiguration) (*AwsKmsProvider, error
 	foundKey := false
 	svc.ListKeysPages(&kms.ListKeysInput{}, func(page *kms.ListKeysOutput, lastPage bool) bool {
 		for _, kmsKey := range page.Keys {
+			fmt.Println(*kmsKey.KeyArn)
 			if *kmsKey.KeyArn == *cfg.KeyId || *kmsKey.KeyId == *cfg.KeyId {
 				foundKey = true
 				break
@@ -103,7 +104,7 @@ type AwsKmsProvider struct {
 
 // Version returns API information to consumers (primarily just the K8 masters themselves )
 func (a AwsKmsProvider) Version(context.Context, *v1beta1.VersionRequest) (*v1beta1.VersionResponse, error) {
-	return &v1beta1.VersionResponse{RuntimeName: "Test", RuntimeVersion: "v1beta1", Version: "v1"}, nil
+	return &v1beta1.VersionResponse{RuntimeName: "kms-enc-provider", RuntimeVersion: "v1beta1", Version: "v1beta1"}, nil
 }
 
 // Decrypt is responsible for converting the *v1beta1.DecryptRequest.Cipher into a plaintext representation

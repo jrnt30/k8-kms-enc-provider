@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/jrnt30/aws-kms-k8-enc-provider/cmd"
+	"github.com/jrnt30/k8-kms-enc-provider/cmd"
 )
 
 // TODO
