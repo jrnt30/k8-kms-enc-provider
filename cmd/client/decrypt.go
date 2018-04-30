@@ -21,20 +21,53 @@
 package cmd
 
 import (
+	"context"
+	"encoding/base64"
 	"fmt"
+	"log"
+	"net"
+	"time"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+
+	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 )
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Displays the Git Commit information from which the CLI was built",
+var cipherText string
+
+// decryptCmd represents the decrypt command
+var decryptCmd = &cobra.Command{
+	Use:   "decrypt",
+	Short: "Allows for the decryption of cipher-text that was encrypted previously",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Current application version is: [%s]", GitCommit)
+		var err error
+
+		gc, err := grpc.Dial(socketPath,
+			grpc.WithInsecure(),
+			grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
+				return net.DialTimeout("unix", addr, timeout)
+			}))
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		client := v1beta1.NewKeyManagementServiceClient(gc)
+
+		decoded, _ := base64.StdEncoding.DecodeString(cipherText)
+
+		resp, err := client.Decrypt(context.Background(), &v1beta1.DecryptRequest{
+			Cipher: decoded,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%s", string(resp.Plain))
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(versionCmd)
+	clientCmd.AddCommand(decryptCmd)
+	decryptCmd.Flags().StringVar(&cipherText, "cipher-text", "", "Ciphertext To Decrypt")
+	decryptCmd.MarkFlagRequired("cipher-text")
 }

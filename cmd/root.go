@@ -28,22 +28,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-var socketPath string
+// GitCommit is injected via the normal build process
+// with the git commit hash for the `version` command
+var GitCommit string
 var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "k8-kms-enc-provider",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Provides an implementation of the K8 KMS provider",
+	Long: `Provides an implemenation of the K8 KMS that leverages AWS KMS as the encryption provider.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Additionally there is a test Client available to test some of the functionality of the server manually.`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -58,11 +54,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "configuration file to use (default is ~/.k8-kms-enc-provider)")
-	RootCmd.PersistentFlags().StringVar(&socketPath, "socket", "/tmp/kms-grpc", "path to the socket to use")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -72,8 +64,8 @@ func initConfig() {
 	}
 
 	viper.SetConfigName(".k8-kms-enc-provider") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")                    // adding home directory as first search path
-	viper.AutomaticEnv()                            // read in environment variables that match
+	viper.AddConfigPath("$HOME")                // adding home directory as first search path
+	viper.AutomaticEnv()                        // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

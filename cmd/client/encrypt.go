@@ -28,23 +28,18 @@ import (
 	"net"
 	"time"
 
-	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+
+	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 )
 
-var cipherText string
+var plainText string
 
-// decryptCmd represents the decrypt command
-var decryptCmd = &cobra.Command{
-	Use:   "decrypt",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// encryptCmd represents the encrypt command
+var encryptCmd = &cobra.Command{
+	Use:   "encrypt",
+	Short: "Allows for the encryption of plain-text",
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
@@ -59,29 +54,20 @@ to quickly create a Cobra application.`,
 		}
 		client := v1beta1.NewKeyManagementServiceClient(gc)
 
-		decoded, _ := base64.StdEncoding.DecodeString(cipherText)
-
-		resp, err := client.Decrypt(context.Background(), &v1beta1.DecryptRequest{
-			Cipher: decoded,
+		resp, err := client.Encrypt(context.Background(), &v1beta1.EncryptRequest{
+			Plain: []byte(plainText),
 		})
+
+		encodedCipherString := base64.StdEncoding.EncodeToString(resp.Cipher)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%s", string(resp.Plain))
+		fmt.Printf("%s", string(encodedCipherString))
 	},
 }
 
 func init() {
-	clientCmd.AddCommand(decryptCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// decryptCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	decryptCmd.Flags().StringVar(&cipherText, "cipher-text", "", "Ciphertext To Decrypt")
-	decryptCmd.MarkFlagRequired("cipher-text")
+	clientCmd.AddCommand(encryptCmd)
+	encryptCmd.Flags().StringVar(&plainText, "plain-text", "", "Plain text to encrypt")
+	encryptCmd.MarkFlagRequired("plain-text")
 }

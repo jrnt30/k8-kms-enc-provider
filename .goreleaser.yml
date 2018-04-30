@@ -1,0 +1,30 @@
+project_name: k8-kms-enc-provider
+
+builds:
+- binary: k8-kms-enc-provider
+  main: .
+  ldflags: -s -w -X github.com/jrnt30/k8-kms-enc-provider/cmd.GitCommit={{.Commit}}
+  lang: go
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  - darwin
+  goarch:
+  - amd64
+
+dockers:
+- image: jrnt30/k8-kms-enc-provider
+  dockerfile: Dockerfile.gorelease
+  tag_templates:
+    - "{{ .Tag }}"
+    - latest
+
+release:
+  github:
+    owner: jrnt30
+    name: k8-kms-enc-provider
+  name_template: '{{.Tag}}'
+
+git:
+  short_hash: true

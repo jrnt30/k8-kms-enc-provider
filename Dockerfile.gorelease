@@ -1,0 +1,8 @@
+FROM alpine:3.7
+
+RUN adduser -D -u 10000 k8-kms-enc-provider
+RUN apk add --no-cache ca-certificates
+
+COPY k8-kms-enc-provider /
+USER k8-kms-enc-provider
+ENTRYPOINT ["/k8-kms-enc-provider"]

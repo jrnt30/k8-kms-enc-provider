@@ -22,29 +22,21 @@ package cmd
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net"
 	"time"
 
-	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+
+	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 )
 
-var plainText string
-
-// encryptCmd represents the encrypt command
-var encryptCmd = &cobra.Command{
-	Use:   "encrypt",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Executes the server's Version endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
@@ -59,20 +51,14 @@ to quickly create a Cobra application.`,
 		}
 		client := v1beta1.NewKeyManagementServiceClient(gc)
 
-		resp, err := client.Encrypt(context.Background(), &v1beta1.EncryptRequest{
-			Plain: []byte(plainText),
-		})
-
-		encodedCipherString := base64.StdEncoding.EncodeToString(resp.Cipher)
+		resp, err := client.Version(context.Background(), &v1beta1.VersionRequest{})
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%s", string(encodedCipherString))
+		fmt.Println("Got response: ", resp)
 	},
 }
 
 func init() {
-	clientCmd.AddCommand(encryptCmd)
-	encryptCmd.Flags().StringVar(&plainText, "plain-text", "", "Plain text to encrypt")
-	encryptCmd.MarkFlagRequired("plain-text")
+	clientCmd.AddCommand(versionCmd)
 }

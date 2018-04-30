@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package cmd
+package server
 
 import (
 	"log"
@@ -32,23 +32,19 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	"github.com/jrnt30/k8-kms-enc-provider/cmd"
 	"github.com/jrnt30/k8-kms-enc-provider/pkg"
 	"github.com/jrnt30/k8-kms-enc-provider/v1beta1"
 )
 
 var awsRegion string
 var keyID string
+var socketPath string
 
 // serverCmd represents the server command
 var serverCmd = &cobra.Command{
 	Use:   "server",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Launches the K8 KMS server component that listens on a socket",
 	Run: func(cmd *cobra.Command, args []string) {
 		keyProviderServer, err := pkg.NewAwsKmsProvider(&pkg.AwsKmsProviderConfiguration{
 			AwsRegion: aws.String(awsRegion),
@@ -95,8 +91,9 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	RootCmd.AddCommand(serverCmd)
+	cmd.RootCmd.AddCommand(serverCmd)
 
+	serverCmd.Flags().StringVar(&socketPath, "socket", "/tmp/kms-grpc", "path to the socket to use")
 	serverCmd.Flags().StringVar(&awsRegion, "region", "", "Region to load the associated KMS Key from")
 	serverCmd.Flags().StringVar(&keyID, "key-id", "", "KMS Key Identifier (ID or ARN) to be used for encryption")
 	serverCmd.MarkFlagRequired("region")
